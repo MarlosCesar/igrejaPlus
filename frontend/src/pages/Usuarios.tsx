@@ -193,11 +193,12 @@ export const Usuarios: React.FC = () => {
               onChange={(e) => setNivel(e.target.value)}
               className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100"
             >
-              <option value="Administrador">Administrador</option>
+              <option value="Membro">Membro</option>
+              <option value="Líder de Setor">Líder de Setor</option>
               <option value="Secretário">Secretário</option>
               <option value="Pastor">Pastor</option>
-              <option value="Líder">Líder de Setor</option>
-              <option value="Operador">Operador</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Visitante">Visitante</option>
             </select>
           </div>
 

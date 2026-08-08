@@ -34,7 +34,8 @@ def check_and_migrate_db():
             "ALTER TABLE membros ADD COLUMN cargo VARCHAR(50) DEFAULT 'Membro'",
             "ALTER TABLE escalas ADD COLUMN tipo_escala VARCHAR(50) DEFAULT 'GERAL'",
             "ALTER TABLE escalas ADD COLUMN mes_ano VARCHAR(50)",
-            "ALTER TABLE escalas ADD COLUMN dados_matriz TEXT"
+            "ALTER TABLE escalas ADD COLUMN dados_matriz TEXT",
+            "ALTER TABLE usuarios ADD COLUMN exige_nova_senha BOOLEAN DEFAULT FALSE"
         ]:
             try:
                 conn.execute(text(stmt))

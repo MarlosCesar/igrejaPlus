@@ -7,6 +7,7 @@ class Token(BaseModel):
     user_id: int
     user_nome: str
     user_nivel: str
+    exige_nova_senha: Optional[bool] = False
 
 class TokenPayload(BaseModel):
     sub: Optional[str] = None

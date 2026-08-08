@@ -13,12 +13,24 @@ export const Login: React.FC = () => {
   // Form fields
   const [nomeInput, setNomeInput] = useState('');
   const [loginInput, setLoginInput] = useState('');
+  const [senhaInput, setSenhaInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [telefoneInput, setTelefoneInput] = useState('');
-  const [senhaInput, setSenhaInput] = useState('');
 
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Password Recovery States
+  const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
+  const [recoverIdentificador, setRecoverIdentificador] = useState('');
+  const [recoverResult, setRecoverResult] = useState<{ login: string; senha_provisoria: string; message: string } | null>(null);
+
+  // Force Change Password States (when logging in with temporary password)
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [tempLogin, setTempLogin] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
+  const [novaSenha, setNovaSenha] = useState('');
+  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -33,6 +45,16 @@ export const Login: React.FC = () => {
         login: loginInput,
         senha: senhaInput,
       });
+
+      if (res.data.exige_nova_senha) {
+        setTempLogin(loginInput);
+        setTempPassword(senhaInput);
+        setNovaSenha('');
+        setConfirmarNovaSenha('');
+        setIsChangePasswordModalOpen(true);
+        setLoading(false);
+        return;
+      }
 
       login(res.data.access_token, {
         user_id: res.data.user_id,
@@ -65,6 +87,67 @@ export const Login: React.FC = () => {
       navigate('/eventos');
     } catch (err: any) {
       setError('Erro ao entrar como visitante.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequestPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    setRecoverResult(null);
+
+    try {
+      const res = await api.post('/auth/recuperar-senha', { identificador: recoverIdentificador });
+      setRecoverResult({
+        login: res.data.login,
+        senha_provisoria: res.data.senha_provisoria,
+        message: res.data.message
+      });
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Erro ao recuperar senha. Verifique o usuário ou e-mail digitado.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (novaSenha !== confirmarNovaSenha) {
+      setError('As senhas não coincidem');
+      return;
+    }
+    if (novaSenha.length < 4) {
+      setError('A nova senha deve ter no mínimo 4 caracteres');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await api.post('/auth/alterar-senha-provisoria', {
+        login: tempLogin,
+        senha_provisoria: tempPassword,
+        nova_senha: novaSenha
+      });
+
+      login(res.data.access_token, {
+        user_id: res.data.user_id,
+        user_nome: res.data.user_nome,
+        user_nivel: res.data.user_nivel,
+      });
+
+      setIsChangePasswordModalOpen(false);
+
+      if (res.data.user_nivel === 'Membro') {
+        navigate('/home');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Erro ao salvar nova senha.');
     } finally {
       setLoading(false);
     }
@@ -188,7 +271,16 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Senha</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">Senha</label>
+                <button
+                  type="button"
+                  onClick={() => { setError(''); setRecoverIdentificador(''); setRecoverResult(null); setIsRecoverModalOpen(true); }}
+                  className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Esqueceu a senha?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
                 <input
@@ -345,6 +437,161 @@ export const Login: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* MODAL 1: RECUPERAR SENHA (GERAR SENHA PROVISÓRIA) */}
+      {isRecoverModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
+                <Lock className="w-4 h-4 text-blue-600" />
+                <span>Recuperar Senha de Acesso</span>
+              </h3>
+              <button onClick={() => setIsRecoverModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <AlertCircle className="w-5 h-5 hidden" />
+                <span>✕</span>
+              </button>
+            </div>
+
+            {!recoverResult ? (
+              <form onSubmit={handleRequestPasswordReset} className="space-y-4 text-xs">
+                <p className="text-slate-600 dark:text-slate-400">
+                  Informe o seu <strong>Login de Usuário</strong> ou <strong>E-mail cadastrado</strong>. O sistema gerará uma nova senha provisória de acesso.
+                </p>
+
+                {error && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs">
+                    {error}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Login ou E-mail *</label>
+                  <input
+                    type="text"
+                    required
+                    value={recoverIdentificador}
+                    onChange={(e) => setRecoverIdentificador(e.target.value)}
+                    placeholder="Digite seu login ou email..."
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end space-x-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsRecoverModalOpen(false)}
+                    className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold shadow-md flex items-center space-x-1.5"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Gerar Senha Provisória'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4 text-xs">
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 space-y-2">
+                  <p className="font-bold text-sm">Senha Provisória Gerada com Sucesso!</p>
+                  <p>{recoverResult.message}</p>
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-emerald-500/30 text-center font-mono font-bold text-base text-slate-900 dark:text-slate-100 tracking-widest">
+                    {recoverResult.senha_provisoria}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginInput(recoverResult.login);
+                    setSenhaInput(recoverResult.senha_provisoria);
+                    setIsRecoverModalOpen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-md"
+                >
+                  Usar esta Senha para Entrar Agora
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: FORÇAR CADASTRAR NOVA SENHA DEFINITIVA */}
+      {isChangePasswordModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
+                <Lock className="w-4 h-4 text-amber-500" />
+                <span>Cadastrar Nova Senha Definitiva</span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Sua conta foi acessada com uma senha provisória. Crie a sua nova senha definitiva abaixo para continuar.
+              </p>
+            </div>
+
+            <form onSubmit={handleConfirmChangePassword} className="space-y-3.5 text-xs">
+              {error && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nova Senha Definitiva *</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={novaSenha}
+                    onChange={(e) => setNovaSenha(e.target.value)}
+                    placeholder="Digite sua nova senha..."
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-10 py-2 text-slate-900 dark:text-slate-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Confirmar Nova Senha *</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={confirmarNovaSenha}
+                    onChange={(e) => setConfirmarNovaSenha(e.target.value)}
+                    placeholder="Confirme a nova senha..."
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-10 py-2 text-slate-900 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/25 flex items-center justify-center space-x-2"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Cadastrar Senha e Entrar</span>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

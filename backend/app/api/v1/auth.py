@@ -11,6 +11,9 @@ from app.services.audit_service import log_action
 
 router = APIRouter()
 
+import secrets
+import string
+
 @router.post("/login", response_model=Token)
 def login(login_data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(Usuario).filter(Usuario.login == login_data.login).first()
@@ -31,7 +34,72 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         token_type="bearer",
         user_id=user.id,
         user_nome=user.nome,
-        user_nivel=user.nivel
+        user_nivel=user.nivel,
+        exige_nova_senha=bool(user.exige_nova_senha)
+    )
+
+class RecuperarSenhaRequest(BaseModel):
+    identificador: str # login ou e-mail
+
+class AlterarSenhaProvisoriaRequest(BaseModel):
+    login: str
+    senha_provisoria: str
+    nova_senha: str
+
+@router.post("/recuperar-senha")
+def recuperar_senha(data: RecuperarSenhaRequest, db: Session = Depends(get_db)):
+    ident = data.identificador.strip().lower()
+    from app.models.membro import Membro
+    user = db.query(Usuario).filter(Usuario.login.ilike(ident)).first()
+    if not user:
+        # Search by email in Membro
+        membro = db.query(Membro).filter(Membro.email.ilike(ident)).first()
+        if membro:
+            user = db.query(Usuario).filter(Usuario.nome == membro.nome).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário ou e-mail não localizado no sistema")
+
+    # Generate 6-char temporary password (e.g. A9k2X7)
+    chars = string.ascii_uppercase + string.digits
+    senha_provisoria = ''.join(secrets.choice(chars) for _ in range(6))
+
+    user.senha_hash = get_password_hash(senha_provisoria)
+    user.exige_nova_senha = True
+    db.commit()
+
+    log_action(db, user.id, user.nome, "RECOVER_PASS", "usuarios", user.id, "Senha provisória gerada para recuperação")
+
+    return {
+        "message": f"Senha provisória gerada com sucesso para o usuário '{user.login}'. Use esta senha para acessar o sistema e cadastrar sua nova senha definitiva.",
+        "login": user.login,
+        "senha_provisoria": senha_provisoria
+    }
+
+@router.post("/alterar-senha-provisoria", response_model=Token)
+def alterar_senha_provisoria(data: AlterarSenhaProvisoriaRequest, db: Session = Depends(get_db)):
+    if len(data.nova_senha) < 4:
+        raise HTTPException(status_code=400, detail="A nova senha deve ter pelo menos 4 caracteres")
+
+    user = db.query(Usuario).filter(Usuario.login == data.login).first()
+    if not user or not verify_password(data.senha_provisoria, user.senha_hash):
+        raise HTTPException(status_code=400, detail="Login ou senha provisória incorretos")
+
+    user.senha_hash = get_password_hash(data.nova_senha)
+    user.exige_nova_senha = False
+    db.commit()
+    db.refresh(user)
+
+    log_action(db, user.id, user.nome, "CHANGE_PASS", "usuarios", user.id, "Nova senha definitiva cadastrada com sucesso")
+
+    access_token = create_access_token(subject=user.id)
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        user_id=user.id,
+        user_nome=user.nome,
+        user_nivel=user.nivel,
+        exige_nova_senha=False
     )
 
 @router.get("/me", response_model=UsuarioResponse)

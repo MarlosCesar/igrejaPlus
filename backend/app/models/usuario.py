@@ -10,6 +10,7 @@ class Usuario(Base):
     nome: Mapped[str] = mapped_column(String(150), nullable=False)
     login: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    nivel: Mapped[str] = mapped_column(String(50), default="Consulta") # Administrador, Secretário, Pastor, Líder, Consulta
+    nivel: Mapped[str] = mapped_column(String(50), default="Consulta") # Administrador, Secretário, Pastor, Líder, Membro, Consulta
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
+    exige_nova_senha: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
