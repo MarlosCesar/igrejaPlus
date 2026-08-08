@@ -20,6 +20,7 @@ class UsuarioUpdate(BaseModel):
 
 class UsuarioResponse(UsuarioBase):
     id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
+    exige_nova_senha: Optional[bool] = False
 
     model_config = ConfigDict(from_attributes=True)
