@@ -16,9 +16,11 @@ from app.services.audit_service import log_action
 
 router = APIRouter()
 
-def _format_evento_response(ev: Evento) -> EventoResponse:
+def _format_evento_response(ev: Evento, db: Session) -> EventoResponse:
+    inscricoes_db = db.query(InscricaoEvento).filter(InscricaoEvento.evento_id == ev.id).order_by(InscricaoEvento.id.asc()).all()
     res = EventoResponse.model_validate(ev)
-    res.total_inscritos = len(ev.inscricoes) if ev.inscricoes else 0
+    res.total_inscritos = len(inscricoes_db)
+    res.inscricoes = [InscricaoEventoResponse.model_validate(ins) for ins in inscricoes_db]
     return res
 
 @router.get("", response_model=List[EventoResponse])
@@ -27,7 +29,7 @@ def list_eventos(
     db: Session = Depends(get_db)
 ):
     eventos = db.query(Evento).order_by(Evento.data_evento.asc(), Evento.id.desc()).all()
-    return [_format_evento_response(ev) for ev in eventos]
+    return [_format_evento_response(ev, db) for ev in eventos]
 
 @router.post("", response_model=EventoResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=EventoResponse, status_code=status.HTTP_201_CREATED)
@@ -42,7 +44,7 @@ def criar_evento(
     db.refresh(evento)
 
     log_action(db, current_user.id, current_user.nome, "CREATE", "eventos", evento.id, f"Evento criado: {evento.titulo}")
-    return _format_evento_response(evento)
+    return _format_evento_response(evento, db)
 
 @router.put("/{evento_id}", response_model=EventoResponse)
 def atualizar_evento(
@@ -62,13 +64,13 @@ def atualizar_evento(
     db.refresh(evento)
 
     log_action(db, current_user.id, current_user.nome, "UPDATE", "eventos", evento.id, f"Evento atualizado: {evento.titulo}")
-    return _format_evento_response(evento)
+    return _format_evento_response(evento, db)
 
 @router.delete("/{evento_id}", status_code=status.HTTP_204_NO_CONTENT)
 def deletar_evento(
     evento_id: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(RoleChecker(["Administrador", "Pastor"]))
+    current_user: Usuario = Depends(RoleChecker(["Administrador", "Pastor", "Secretário"]))
 ):
     evento = db.query(Evento).filter(Evento.id == evento_id).first()
     if not evento:
@@ -76,7 +78,16 @@ def deletar_evento(
 
     db.delete(evento)
     db.commit()
-    return None
+    log_action(db, current_user.id, current_user.nome, "DELETE", "eventos", evento_id, f"Evento excluído: {evento.titulo}")
+
+@router.get("/{evento_id}/participantes", response_model=List[InscricaoEventoResponse])
+def listar_participantes_evento(
+    evento_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    inscritos = db.query(InscricaoEvento).filter(InscricaoEvento.evento_id == evento_id).order_by(InscricaoEvento.id.asc()).all()
+    return [InscricaoEventoResponse.model_validate(ins) for ins in inscritos]
 
 @router.post("/{evento_id}/inscrever", response_model=InscricaoEventoResponse)
 def inscrever_evento(
@@ -125,13 +136,13 @@ def inscrever_evento(
 def relatorio_evento_pdf(
     evento_id: int,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(RoleChecker(["Administrador", "Pastor", "Secretário"]))
+    current_user: Usuario = Depends(get_current_user)
 ):
     evento = db.query(Evento).filter(Evento.id == evento_id).first()
     if not evento:
         raise HTTPException(status_code=404, detail="Evento não encontrado")
 
-    inscritos = evento.inscricoes or []
+    inscritos = db.query(InscricaoEvento).filter(InscricaoEvento.evento_id == evento_id).order_by(InscricaoEvento.id.asc()).all()
     dt_str = evento.data_evento.strftime("%d/%m/%Y")
 
     pdf_url = generate_relatorio_evento_pdf(

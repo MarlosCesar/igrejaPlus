@@ -365,15 +365,26 @@ export const Eventos: React.FC = () => {
                   )}
 
                   {isAdmin && ev.requer_inscricao && (
-                    <button
-                      onClick={() => handleDownloadRelatorioPdf(ev.id)}
-                      disabled={downloadingPdf}
-                      className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all flex items-center space-x-1"
-                      title="Relatório de Participantes (PDF)"
-                    >
-                      <FileText className="w-4 h-4 text-blue-600" />
-                      <span>PDF</span>
-                    </button>
+                    <div className="flex items-center space-x-1.5">
+                      <button
+                        onClick={() => setSelectedEventoParticipantes(ev)}
+                        className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center space-x-1"
+                        title="Ver lista de inscritos"
+                      >
+                        <Users className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        <span>Inscritos ({ev.total_inscritos || ev.inscricoes?.length || 0})</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDownloadRelatorioPdf(ev.id)}
+                        disabled={downloadingPdf}
+                        className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all flex items-center space-x-1"
+                        title="Relatório de Participantes em PDF"
+                      >
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <span>PDF</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -647,6 +658,77 @@ export const Eventos: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL RELATÓRIO / LISTA DE PARTICIPANTES DO EVENTO */}
+      {selectedEventoParticipantes && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-3xl shadow-2xl space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center space-x-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span>Relatório de Participantes Inscritos</span>
+                </h3>
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-0.5">
+                  {selectedEventoParticipantes.titulo} — {formatDateBR(selectedEventoParticipantes.data_evento)} ({selectedEventoParticipantes.hora_evento || '19:00'})
+                </p>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleDownloadRelatorioPdf(selectedEventoParticipantes.id)}
+                  disabled={downloadingPdf}
+                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all flex items-center space-x-1.5"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Baixar PDF</span>
+                </button>
+                <button onClick={() => setSelectedEventoParticipantes(null)} className="text-slate-400 hover:text-slate-600 p-1">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {!selectedEventoParticipantes.inscricoes || selectedEventoParticipantes.inscricoes.length === 0 ? (
+              <div className="p-8 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+                Nenhuma inscrição realizada até o momento para este evento.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-1">
+                  <span>Total de Inscritos: <strong>{selectedEventoParticipantes.inscricoes.length} pessoas</strong></span>
+                </div>
+
+                <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden max-h-96 overflow-y-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-100 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold sticky top-0">
+                      <tr>
+                        <th className="p-3 w-12 text-center">#</th>
+                        <th className="p-3">Nome do Participante</th>
+                        <th className="p-3">Telefone / WhatsApp</th>
+                        <th className="p-3">Congregação</th>
+                        <th className="p-3">Data Inscrição</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                      {selectedEventoParticipantes.inscricoes.map((ins, idx) => (
+                        <tr key={ins.id} className="hover:bg-slate-50 dark:hover:bg-slate-950/50 transition-colors">
+                          <td className="p-3 text-center font-bold text-slate-400">{idx + 1}</td>
+                          <td className="p-3 font-semibold text-slate-900 dark:text-slate-100">{ins.nome}</td>
+                          <td className="p-3">{ins.telefone || '-'}</td>
+                          <td className="p-3">{ins.congregacao || 'Jardim Primavera'}</td>
+                          <td className="p-3 text-slate-500 font-mono text-[11px]">
+                            {new Date(ins.data_inscricao).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
