@@ -1,6 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M18 22H6a2 2 0 0 1-2-2V8l8-5 8 5v12a2 2 0 0 1-2 2z"/>
-  <path d="M12 7v5"/>
-  <path d="M10 9h4"/>
-  <path d="M10 22v-6a2 2 0 0 1 4 0v6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="faviconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Blue Rounded Square Background -->
+  <rect width="100" height="100" rx="26" fill="url(#faviconGrad)"/>
+
+  <!-- Church Icon Structure -->
+  <g fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Main Center Roof & Outer Walls -->
+    <path d="M 50,22 L 67,33 V 74 H 33 V 33 Z" />
+
+    <!-- Left Wing -->
+    <path d="M 33,40 H 25 C 22,40 22,43 22,46 V 74 H 33" />
+
+    <!-- Right Wing -->
+    <path d="M 67,40 H 75 C 78,40 78,43 78,46 V 74 H 67" />
+
+    <!-- Cross in Upper Center -->
+    <path d="M 50,37 V 51" />
+    <path d="M 43,44 H 57" />
+
+    <!-- Arched Entrance Door -->
+    <path d="M 44,74 V 66 C 44,62.7 46.7,60 50,60 C 53.3,60 56,62.7 56,66 V 74" />
+  </g>
 </svg>
