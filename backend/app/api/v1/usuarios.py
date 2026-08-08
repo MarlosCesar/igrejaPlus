@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("/", response_model=List[UsuarioResponse])
 def list_usuarios(
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(RoleChecker(["Administrador", "Pastor", "Secretário"]))
+    current_user: Usuario = Depends(get_current_user)
 ):
     usuarios = db.query(Usuario).order_by(Usuario.nome.asc()).all()
     return usuarios

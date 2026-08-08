@@ -3,10 +3,10 @@ from typing import Optional
 from datetime import datetime
 
 class UsuarioBase(BaseModel):
-    nome: str
-    login: str
-    nivel: str = "Consulta" # Administrador, Secretário, Pastor, Líder, Consulta
-    ativo: bool = True
+    nome: Optional[str] = ""
+    login: Optional[str] = ""
+    nivel: Optional[str] = "Membro"
+    ativo: Optional[bool] = True
 
 class UsuarioCreate(UsuarioBase):
     senha: str
