@@ -16,7 +16,7 @@ class SetorUpdate(BaseModel):
 
 class SetorResponse(SetorBase):
     id: int
-    membros_count: int = 0
+    membros_count: Optional[int] = 0
 
     model_config = ConfigDict(from_attributes=True)
 
