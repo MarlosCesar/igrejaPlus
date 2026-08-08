@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserCog, Plus, Shield, Loader2, Edit, Trash2 } from 'lucide-react';
+import { UserCog, Plus, Shield, Loader2, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
 import api from '../services/api';
 import { Usuario } from '../types';
 import { Modal } from '../components/ui/Modal';
@@ -15,6 +15,7 @@ export const Usuarios: React.FC = () => {
   const [nome, setNome] = useState('');
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
+  const [showSenha, setShowSenha] = useState(false);
   const [nivel, setNivel] = useState('Secretário');
   const [ativo, setAtivo] = useState(true);
 
@@ -166,13 +167,23 @@ export const Usuarios: React.FC = () => {
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
               {selectedUser ? 'Nova Senha (deixe em branco para manter a atual)' : 'Senha de Acesso *'}
             </label>
-            <input
-              type="password"
-              required={!selectedUser}
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100"
-            />
+            <div className="relative">
+              <input
+                type={showSenha ? 'text' : 'password'}
+                required={!selectedUser}
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-3.5 pr-10 py-2 text-xs text-slate-900 dark:text-slate-100"
+              />
+              <button
+                type="button"
+                onClick={() => setShowSenha(!showSenha)}
+                className="absolute right-3 top-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                title={showSenha ? 'Ocultar senha' : 'Exibir senha'}
+              >
+                {showSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div>

@@ -417,6 +417,8 @@ export const Membros: React.FC = () => {
 
   const inputClass = "w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all";
 
+  const isMembroRole = user?.user_nivel === 'Membro';
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -424,12 +426,14 @@ export const Membros: React.FC = () => {
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center space-x-2">
             <Users className="w-6 h-6 text-blue-600 dark:text-blue-500" />
-            <span>Gestão de Membros</span>
+            <span>{isMembroRole ? 'Meu Cadastro de Membro' : 'Gestão de Membros'}</span>
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cadastro centralizado e gerenciamento de membros da igreja</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            {isMembroRole ? 'Visualização e atualização dos seus dados cadastrais' : 'Cadastro centralizado e gerenciamento de membros da igreja'}
+          </p>
         </div>
 
-        {canEdit && (
+        {canEdit && !isMembroRole && (
           <button
             onClick={handleOpenAddModal}
             className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-600/25 transition-all"
@@ -440,13 +444,14 @@ export const Membros: React.FC = () => {
         )}
       </div>
 
-      {/* Filters Card */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-          <Filter className="w-4 h-4 text-blue-600" />
-          <span>Filtros de Busca Avançada</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      {/* Filters Card - Hidden for Membro role */}
+      {!isMembroRole && (
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <Filter className="w-4 h-4 text-blue-600" />
+            <span>Filtros de Busca Avançada</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           <input
             type="text"
             placeholder="Nome do membro..."
@@ -504,6 +509,7 @@ export const Membros: React.FC = () => {
           </select>
         </div>
       </div>
+      )}
 
       {/* Table Section */}
       <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">

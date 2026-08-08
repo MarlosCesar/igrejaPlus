@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Printer, Search, RefreshCw, Loader2, Download, CheckCircle2, X, Edit, Trash2, ShieldCheck, QrCode, Camera, ZoomIn, Move, RotateCcw } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { Carteirinha, Membro } from '../types';
 import { formatDateBR } from '../utils/formatters';
 
@@ -15,6 +16,7 @@ interface MembroPendente {
 }
 
 export const Carteirinhas: React.FC = () => {
+  const { user } = useAuth();
   const [carteirinhas, setCarteirinhas] = useState<Carteirinha[]>([]);
   const [membrosPendentes, setMembrosPendentes] = useState<MembroPendente[]>([]);
   const [membrosTodos, setMembrosTodos] = useState<Membro[]>([]);
@@ -290,28 +292,31 @@ export const Carteirinhas: React.FC = () => {
     c.congregacao?.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const isMembroOnly = user?.user_nivel === 'Membro';
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Page Header */}
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center space-x-2">
           <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-500" />
-          <span>Gestão de Carteirinhas de Membros</span>
+          <span>{isMembroOnly ? 'Minha Carteirinha Eclesiástica' : 'Gestão de Carteirinhas de Membros'}</span>
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Emissão, atualização e impressão de carteirinhas de identificação eclesiástica com QR Code
+          {isMembroOnly ? 'Visualização e impressão da sua carteirinha de membro com QR Code' : 'Emissão, atualização e impressão de carteirinhas de identificação eclesiástica com QR Code'}
         </p>
       </div>
 
-      {/* Main Issue Section Card */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-          <RefreshCw className="w-4 h-4 text-blue-600" />
-          <span>{editingCarteirinhaId ? 'Editar / Atualizar Carteirinha Emitida' : 'Emitir Nova Carteirinha de Membro'}</span>
-        </div>
+      {/* Admin Issue Section Card - Hidden for Membro */}
+      {!isMembroOnly && (
+        <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="flex items-center space-x-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <RefreshCw className="w-4 h-4 text-blue-600" />
+            <span>{editingCarteirinhaId ? 'Editar / Atualizar Carteirinha Emitida' : 'Emitir Nova Carteirinha de Membro'}</span>
+          </div>
 
-        {/* Dropdown & Buttons Row */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Dropdown & Buttons Row */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
             value={selectedMembroId}
             onChange={(e) => handleSelectMembro(e.target.value)}
@@ -541,26 +546,33 @@ export const Carteirinhas: React.FC = () => {
           </div>
         )}
       </div>
+      )}
 
-      {/* History List Section */}
+      {/* History List Section / Member Card View */}
       <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Histórico de Carteirinhas Emitidas</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lista de carteirinhas geradas com opção de impressão e atualização</p>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              {isMembroOnly ? 'Sua Carteirinha de Membro Emitida' : 'Histórico de Carteirinhas Emitidas'}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              {isMembroOnly ? 'Carteirinha de identificação eclesiástica com QR Code' : 'Lista de carteirinhas geradas com opção de impressão e atualização'}
+            </p>
           </div>
 
-          {/* Search */}
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Buscar por nome..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
+          {/* Search - Hidden for Membro */}
+          {!isMembroOnly && (
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Buscar por nome..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
+          )}
         </div>
 
         {/* History Table */}
@@ -569,8 +581,18 @@ export const Carteirinhas: React.FC = () => {
             <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
           </div>
         ) : carteirinhasFiltradas.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 text-xs">
-            Nenhuma carteirinha emitida encontrada.
+          <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-xs bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
+            {isMembroOnly ? (
+              <div className="space-y-2 max-w-md mx-auto">
+                <CreditCard className="w-8 h-8 mx-auto text-blue-500/60" />
+                <p className="font-bold text-slate-700 dark:text-slate-300">Carteirinha em Processo de Emissão</p>
+                <p className="text-[11px] leading-relaxed">
+                  Sua carteirinha está em fase de preparação e processamento pela secretaria da igreja. Assim que a emissão for concluída pelo administrador, o documento estará disponível nesta tela para visualização e impressão.
+                </p>
+              </div>
+            ) : (
+              'Nenhuma carteirinha emitida encontrada.'
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -616,21 +638,25 @@ export const Carteirinhas: React.FC = () => {
                           <span>Imprimir PDF</span>
                         </button>
 
-                        <button
-                          onClick={() => handleEditCarteirinha(card)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                          title="Editar / Reabrir Modelo"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                        {!isMembroOnly && (
+                          <>
+                            <button
+                              onClick={() => handleEditCarteirinha(card)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                              title="Editar / Reabrir Modelo"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
 
-                        <button
-                          onClick={() => handleDeleteCarteirinha(card.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                          title="Cancelar Emissão"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                            <button
+                              onClick={() => handleDeleteCarteirinha(card.id)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                              title="Cancelar Emissão"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

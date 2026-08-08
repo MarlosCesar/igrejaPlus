@@ -3,8 +3,14 @@ import { Search, User, Shield, CreditCard, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { SearchResult } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 export const GlobalSearch: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.user_nivel === 'Membro') {
+    return null;
+  }
+
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
