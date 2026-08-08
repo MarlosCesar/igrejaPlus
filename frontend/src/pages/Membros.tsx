@@ -771,9 +771,10 @@ export const Membros: React.FC = () => {
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Cargo Eclesiástico *</label>
               <select
+                disabled={isMembroRole}
                 value={formData.cargo}
                 onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${isMembroRole ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <option value="Membro">Membro</option>
                 <option value="Diácono">Diácono / Diáconisa</option>
@@ -787,9 +788,10 @@ export const Membros: React.FC = () => {
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Situação</label>
               <select
+                disabled={isMembroRole}
                 value={formData.situacao}
                 onChange={(e) => setFormData({ ...formData, situacao: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} ${isMembroRole ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <option value="Ativo">Ativo</option>
                 <option value="Inativo">Inativo</option>
@@ -940,27 +942,41 @@ export const Membros: React.FC = () => {
           {/* Setores Multiselect Pills */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
-              Setores / Ministérios que participa
+              Setores / Ministérios Integrados {isMembroRole && '(Visualização apenas)'}
             </label>
-            <div className="flex flex-wrap gap-2">
-              {setores.map((setor) => {
-                const selected = formData.setor_ids.includes(setor.id);
-                return (
-                  <button
-                    key={setor.id}
-                    type="button"
-                    onClick={() => handleToggleSetor(setor.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
-                      selected
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    {setor.nome}
-                  </button>
-                );
-              })}
-            </div>
+            {isMembroRole ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {setores.filter(s => formData.setor_ids.includes(s.id)).length > 0 ? (
+                  setores.filter(s => formData.setor_ids.includes(s.id)).map((s) => (
+                    <span key={s.id} className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                      {s.nome}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-slate-400 italic">Nenhum setor associado</span>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {setores.map((setor) => {
+                  const selected = formData.setor_ids.includes(setor.id);
+                  return (
+                    <button
+                      key={setor.id}
+                      type="button"
+                      onClick={() => handleToggleSetor(setor.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                        selected
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {setor.nome}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Sub-Seleção de Instrumentos caso "Músico" esteja selecionado */}
@@ -1134,70 +1150,76 @@ export const Membros: React.FC = () => {
               )}
             </div>
 
-            {/* ACTION BUTTONS FOOTER: E-mail, WhatsApp, Ligar, Localização, Editar, Excluir */}
+            {/* ACTION BUTTONS FOOTER */}
             <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap gap-2">
-                {/* Botão WhatsApp */}
-                <button
-                  type="button"
-                  onClick={() => handleSendWhatsapp(selectedMembro.whatsapp || selectedMembro.telefone)}
-                  className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>WhatsApp</span>
-                </button>
+              {!isMembroRole ? (
+                <div className="flex flex-wrap gap-2">
+                  {/* Botão WhatsApp */}
+                  <button
+                    type="button"
+                    onClick={() => handleSendWhatsapp(selectedMembro.whatsapp || selectedMembro.telefone)}
+                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>WhatsApp</span>
+                  </button>
 
-                {/* Botão E-mail */}
-                <button
-                  type="button"
-                  onClick={() => handleSendEmail(selectedMembro.email)}
-                  className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-all"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>Enviar E-mail</span>
-                </button>
+                  {/* Botão E-mail */}
+                  <button
+                    type="button"
+                    onClick={() => handleSendEmail(selectedMembro.email)}
+                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/20 transition-all"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>Enviar E-mail</span>
+                  </button>
 
-                {/* Botão Ligar */}
-                <button
-                  type="button"
-                  onClick={handlePhoneCallInit}
-                  className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all"
-                >
-                  <Phone className="w-4 h-4" />
-                  <span>Ligar</span>
-                </button>
+                  {/* Botão Ligar */}
+                  <button
+                    type="button"
+                    onClick={handlePhoneCallInit}
+                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/20 transition-all"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span>Ligar</span>
+                  </button>
 
-                {/* Botão Localização (Google Maps) */}
-                <button
-                  type="button"
-                  onClick={handleOpenLocation}
-                  className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-all"
-                  title="Abrir no Google Maps"
-                >
-                  <Navigation className="w-4 h-4" />
-                  <span>Localização</span>
-                </button>
-              </div>
+                  {/* Botão Localização (Google Maps) */}
+                  <button
+                    type="button"
+                    onClick={handleOpenLocation}
+                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-all"
+                    title="Abrir no Google Maps"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    <span>Localização</span>
+                  </button>
+                </div>
+              ) : (
+                <div />
+              )}
 
               {canEdit && (
                 <div className="flex items-center space-x-2">
                   <button
                     type="button"
                     onClick={() => { setIsDetailOpen(false); handleOpenEditModal(selectedMembro); }}
-                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs shadow-md shadow-amber-600/20 transition-all"
+                    className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs shadow-md shadow-amber-600/20 transition-all"
                   >
                     <Edit className="w-4 h-4" />
-                    <span>Editar</span>
+                    <span>{isMembroRole ? 'Editar Meus Dados' : 'Editar'}</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(selectedMembro.id)}
-                    className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-md shadow-rose-600/20 transition-all"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span>Excluir</span>
-                  </button>
+                  {!isMembroRole && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(selectedMembro.id)}
+                      className="inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-md shadow-rose-600/20 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Excluir</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>

@@ -41,7 +41,7 @@ export const Login: React.FC = () => {
       });
 
       if (res.data.user_nivel === 'Membro') {
-        navigate('/membros');
+        navigate('/home');
       } else {
         navigate('/dashboard');
       }
@@ -90,7 +90,7 @@ export const Login: React.FC = () => {
         user_nivel: res.data.user_nivel,
       });
 
-      navigate('/membros');
+      navigate('/home');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao cadastrar usuário.');
     } finally {
