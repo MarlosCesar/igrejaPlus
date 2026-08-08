@@ -1,4 +1,4 @@
-const CACHE_NAME = 'igrejaplus-v1';
+const CACHE_NAME = 'igrejaplus-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -32,14 +32,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event - Network First with Cache Fallback
+// Fetch Event - Network First with Cache Fallback for SPA
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+
+  // Skip API calls, uploads, and non-GET requests
+  if (event.request.method !== 'GET' || url.pathname.startsWith('/api') || url.pathname.startsWith('/uploads')) {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response.status === 200 && event.request.url.startsWith('http')) {
+        if (response.status === 200 && url.origin === location.origin) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
@@ -47,13 +52,15 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => {
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) return cachedResponse;
-          if (event.request.headers.get('accept').includes('text/html')) {
-            return caches.match('/index.html');
-          }
-        });
+      .catch(async () => {
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) return cachedResponse;
+
+        // Fallback for SPA routing
+        const indexHtml = await caches.match('/index.html');
+        if (indexHtml) return indexHtml;
+
+        return new Response('Rede indisponível', { status: 503, headers: { 'Content-Type': 'text/plain' } });
       })
   );
 });

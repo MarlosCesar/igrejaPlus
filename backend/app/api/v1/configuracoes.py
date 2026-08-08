@@ -23,6 +23,7 @@ def get_configuracao(db: Session = Depends(get_db)):
         db.refresh(config)
     return config
 
+@router.put("", response_model=ConfiguracaoResponse)
 @router.put("/", response_model=ConfiguracaoResponse)
 def update_configuracao(
     data: ConfiguracaoUpdate,
