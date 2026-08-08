@@ -111,23 +111,41 @@ def update_membro(
     membro_id: int,
     data: MembroUpdate,
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(RoleChecker(["Administrador", "Secretário", "Pastor"]))
+    current_user: Usuario = Depends(get_current_user)
 ):
     membro = db.query(Membro).filter(Membro.id == membro_id).first()
     if not membro:
         raise HTTPException(status_code=404, detail="Membro não encontrado")
 
+    # Permission check: Admin/Secretário/Pastor/Líder OR Membro updating OWN record
+    if current_user.nivel not in ["Administrador", "Secretário", "Pastor", "Líder de Setor"]:
+        if current_user.nivel == "Membro":
+            is_owner = (
+                membro.nome.strip().lower() == current_user.nome.strip().lower() or
+                (membro.email and membro.email.strip().lower() == current_user.login.strip().lower())
+            )
+            if not is_owner:
+                raise HTTPException(status_code=403, detail="Acesso negado: você só pode editar o seu próprio cadastro")
+        else:
+            raise HTTPException(status_code=403, detail="Acesso negado: permissão insuficiente")
+
     update_dict = data.model_dump(exclude_unset=True)
-    setor_ids = update_dict.pop("setor_ids", None)
+
+    # Protect administrative fields if user is a Membro
+    if current_user.nivel == "Membro":
+        update_dict.pop("cargo", None)
+        update_dict.pop("situacao", None)
+        update_dict.pop("setor_ids", None)
+    else:
+        setor_ids = update_dict.pop("setor_ids", None)
+        if setor_ids is not None:
+            db.query(MembroSetor).filter(MembroSetor.membro_id == membro_id).delete()
+            for s_id in setor_ids:
+                ms = MembroSetor(membro_id=membro.id, setor_id=s_id, ativo=True)
+                db.add(ms)
 
     for field, val in update_dict.items():
         setattr(membro, field, val)
-
-    if setor_ids is not None:
-        db.query(MembroSetor).filter(MembroSetor.membro_id == membro_id).delete()
-        for s_id in setor_ids:
-            ms = MembroSetor(membro_id=membro.id, setor_id=s_id, ativo=True)
-            db.add(ms)
 
     db.commit()
     db.refresh(membro)
@@ -161,7 +179,7 @@ def upload_foto(
     file: Optional[UploadFile] = File(None),
     foto: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(RoleChecker(["Administrador", "Secretário", "Pastor"]))
+    current_user: Usuario = Depends(get_current_user)
 ):
     upload_file = file or foto
     if not upload_file:
@@ -170,6 +188,18 @@ def upload_foto(
     membro = db.query(Membro).filter(Membro.id == membro_id).first()
     if not membro:
         raise HTTPException(status_code=404, detail="Membro não encontrado")
+
+    # Permission check: Admin/Secretário/Pastor/Líder OR Membro updating OWN photo
+    if current_user.nivel not in ["Administrador", "Secretário", "Pastor", "Líder de Setor"]:
+        if current_user.nivel == "Membro":
+            is_owner = (
+                membro.nome.strip().lower() == current_user.nome.strip().lower() or
+                (membro.email and membro.email.strip().lower() == current_user.login.strip().lower())
+            )
+            if not is_owner:
+                raise HTTPException(status_code=403, detail="Acesso negado: você só pode alterar a sua própria foto")
+        else:
+            raise HTTPException(status_code=403, detail="Acesso negado: permissão insuficiente")
 
     output_dir = os.path.join(settings.UPLOAD_DIR, "fotos")
     os.makedirs(output_dir, exist_ok=True)
