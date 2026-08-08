@@ -17,6 +17,13 @@ def is_postgres_port_open(host: str = "127.0.0.1", port: int = 5432) -> bool:
         return False
 
 def get_working_engine():
+    if settings.DATABASE_URL:
+        # If user configured a cloud database (Postgres/Supabase/Render Postgres), use it directly
+        url = settings.get_database_url()
+        if url.startswith("sqlite"):
+            return create_engine(url, connect_args={"check_same_thread": False}, pool_pre_ping=True)
+        return create_engine(url, pool_pre_ping=True)
+
     if db_url.startswith("sqlite"):
         return create_engine(db_url, connect_args={"check_same_thread": False}, pool_pre_ping=True)
 
