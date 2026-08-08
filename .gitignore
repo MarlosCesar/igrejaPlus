@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+backend/venv/
+backend/env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build Outputs
+frontend/dist/
+frontend/build/
+
+# Environment Variables
+.env
+.env.local
+*.env
+
+# SQLite Database & Uploaded User Media (Keep uploads dir structure)
+backend/*.db
+backend/*.sqlite3
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
