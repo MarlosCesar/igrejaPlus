@@ -1038,7 +1038,11 @@ export const Membros: React.FC = () => {
           <div className="space-y-6">
             {/* Header Profile Info */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-5 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
-              <div className="w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 overflow-hidden flex items-center justify-center font-bold text-slate-600 text-2xl shrink-0 shadow-sm">
+              <div
+                onClick={() => { setIsDetailOpen(false); handleOpenEditModal(selectedMembro); }}
+                className="relative w-20 h-20 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 overflow-hidden flex items-center justify-center font-bold text-slate-600 text-2xl shrink-0 shadow-sm cursor-pointer group"
+                title="Clique para alterar / anexar foto"
+              >
                 {selectedMembro.foto && !imageError ? (
                   <img
                     src={getFotoUrl(selectedMembro.foto) || ''}
@@ -1049,6 +1053,10 @@ export const Membros: React.FC = () => {
                 ) : (
                   selectedMembro.nome.charAt(0)
                 )}
+                <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-opacity text-white text-[9px] font-bold">
+                  <Camera className="w-5 h-5 mb-0.5" />
+                  <span>Alterar Foto</span>
+                </div>
               </div>
               <div className="text-center sm:text-left space-y-1 flex-1">
                 <div className="flex items-center justify-center sm:justify-start space-x-2">

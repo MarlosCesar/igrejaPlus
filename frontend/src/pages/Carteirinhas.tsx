@@ -167,7 +167,7 @@ export const Carteirinhas: React.FC = () => {
     }
   };
 
-  // Render photo canvas with zoom & position offset
+  // Render photo canvas with zoom & position offset preserving natural aspect ratio
   const createCroppedPhotoBlob = (imageSrc: string): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -178,20 +178,33 @@ export const Carteirinhas: React.FC = () => {
         canvas.width = 400;
         canvas.height = 500;
 
-        ctx.fillStyle = '#1e293b';
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.save();
-        // Apply zoom and offset
-        ctx.translate(canvas.width / 2 + imgX * 4, canvas.height / 2 + imgY * 4);
+        // Translate center + user position offsets
+        ctx.translate(canvas.width / 2 + imgX * 3, canvas.height / 2 + imgY * 3);
         ctx.scale(imgZoom, imgZoom);
-        ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+
+        // Calculate aspect-ratio cover dimensions to avoid stretching ("foto estreita")
+        const imgRatio = img.width / img.height;
+        const canvasRatio = canvas.width / canvas.height;
+        let drawW = canvas.width;
+        let drawH = canvas.height;
+
+        if (imgRatio > canvasRatio) {
+          drawW = canvas.height * imgRatio;
+        } else {
+          drawH = canvas.width / imgRatio;
+        }
+
+        ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
 
         canvas.toBlob((blob) => {
           if (blob) resolve(blob);
           else reject(new Error('Erro ao processar imagem no canvas'));
-        }, 'image/jpeg', 0.92);
+        }, 'image/jpeg', 0.95);
       };
       img.onerror = () => reject(new Error('Erro ao carregar imagem para corte'));
       img.src = imageSrc;
