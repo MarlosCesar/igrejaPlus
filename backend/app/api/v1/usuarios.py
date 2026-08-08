@@ -10,14 +10,25 @@ from app.services.audit_service import log_action
 
 router = APIRouter()
 
+from sqlalchemy import text
+
 @router.get("", response_model=List[UsuarioResponse])
 @router.get("/", response_model=List[UsuarioResponse])
 def list_usuarios(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    usuarios = db.query(Usuario).order_by(Usuario.nome.asc()).all()
-    return usuarios
+    try:
+        usuarios = db.query(Usuario).order_by(Usuario.nome.asc()).all()
+        return usuarios
+    except Exception as e:
+        print(f"[USUARIOS RECOVERY] Executing column check on usuarios table: {e}")
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE usuarios ADD COLUMN exige_nova_senha BOOLEAN DEFAULT FALSE"))
+        except Exception:
+            pass
+        return db.query(Usuario).all()
 
 
 @router.post("", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)

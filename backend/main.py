@@ -27,21 +27,20 @@ from sqlalchemy import text
 for sub in ["fotos", "documentos", "logos", "carteirinhas", "exportacoes"]:
     os.makedirs(os.path.join(settings.UPLOAD_DIR, sub), exist_ok=True)
 
-# Run auto migration check for new columns on existing database
 def check_and_migrate_db():
-    with engine.connect() as conn:
-        for stmt in [
-            "ALTER TABLE membros ADD COLUMN cargo VARCHAR(50) DEFAULT 'Membro'",
-            "ALTER TABLE escalas ADD COLUMN tipo_escala VARCHAR(50) DEFAULT 'GERAL'",
-            "ALTER TABLE escalas ADD COLUMN mes_ano VARCHAR(50)",
-            "ALTER TABLE escalas ADD COLUMN dados_matriz TEXT",
-            "ALTER TABLE usuarios ADD COLUMN exige_nova_senha BOOLEAN DEFAULT FALSE"
-        ]:
-            try:
+    statements = [
+        "ALTER TABLE membros ADD COLUMN cargo VARCHAR(50) DEFAULT 'Membro'",
+        "ALTER TABLE escalas ADD COLUMN tipo_escala VARCHAR(50) DEFAULT 'GERAL'",
+        "ALTER TABLE escalas ADD COLUMN mes_ano VARCHAR(50)",
+        "ALTER TABLE escalas ADD COLUMN dados_matriz TEXT",
+        "ALTER TABLE usuarios ADD COLUMN exige_nova_senha BOOLEAN DEFAULT FALSE"
+    ]
+    for stmt in statements:
+        try:
+            with engine.begin() as conn:
                 conn.execute(text(stmt))
-                conn.commit()
-            except Exception:
-                pass
+        except Exception as e:
+            pass
 
 check_and_migrate_db()
 
