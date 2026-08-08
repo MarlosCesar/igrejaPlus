@@ -112,6 +112,7 @@ export interface Evento {
   data_evento: string;
   hora_evento?: string;
   local?: string;
+  imagem_url?: string;
   requer_inscricao: boolean;
   ativo: boolean;
   data_criacao: string;

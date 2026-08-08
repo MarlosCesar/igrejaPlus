@@ -5,6 +5,45 @@ import { useAuth } from '../context/AuthContext';
 import { Evento, InscricaoEvento, Membro } from '../types';
 import { formatDateBR } from '../utils/formatters';
 
+const PRESET_BANNERS = [
+  {
+    id: 'celebracao',
+    nome: 'Culto de Celebração',
+    url: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1000&q=80',
+    tag: 'Celebração'
+  },
+  {
+    id: 'mulheres',
+    nome: 'Congresso de Mulheres',
+    url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1000&q=80',
+    tag: 'Feminino'
+  },
+  {
+    id: 'jovens',
+    nome: 'Impacto Jovem / Mocidade',
+    url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1000&q=80',
+    tag: 'Jovens'
+  },
+  {
+    id: 'ceia',
+    nome: 'Santa Ceia do Senhor',
+    url: 'https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&w=1000&q=80',
+    tag: 'Comunhão'
+  },
+  {
+    id: 'ensino',
+    nome: 'Culto de Ensino & Doutrina',
+    url: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1000&q=80',
+    tag: 'Ensino'
+  },
+  {
+    id: 'oracao',
+    nome: 'Vigília & Reunião de Oração',
+    url: 'https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1000&q=80',
+    tag: 'Oração'
+  }
+];
+
 export const Eventos: React.FC = () => {
   const { user } = useAuth();
   const isAdmin = user && ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor'].includes(user.user_nivel);
@@ -27,6 +66,7 @@ export const Eventos: React.FC = () => {
     data_evento: '',
     hora_evento: '19:00',
     local: 'Sede Principal',
+    imagem_url: PRESET_BANNERS[0].url,
     requer_inscricao: true,
     ativo: true
   });
@@ -76,6 +116,7 @@ export const Eventos: React.FC = () => {
         data_evento: ev.data_evento,
         hora_evento: ev.hora_evento || '19:00',
         local: ev.local || 'Sede Principal',
+        imagem_url: ev.imagem_url || PRESET_BANNERS[0].url,
         requer_inscricao: ev.requer_inscricao,
         ativo: ev.ativo
       });
@@ -87,6 +128,7 @@ export const Eventos: React.FC = () => {
         data_evento: new Date().toISOString().split('T')[0],
         hora_evento: '19:00',
         local: 'Sede Principal',
+        imagem_url: PRESET_BANNERS[0].url,
         requer_inscricao: true,
         ativo: true
       });
@@ -226,57 +268,70 @@ export const Eventos: React.FC = () => {
           Nenhum evento cadastrado no momento.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {eventos.map((ev) => (
             <div
               key={ev.id}
-              className={`p-6 rounded-2xl border transition-all flex flex-col justify-between space-y-4 ${
+              className={`group rounded-3xl border transition-all overflow-hidden flex flex-col justify-between ${
                 ev.ativo
-                  ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md'
+                  ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl'
                   : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800/60 opacity-60'
               }`}
             >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <span className={`inline-block text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider ${
-                    ev.ativo
-                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
-                  }`}>
-                    {ev.ativo ? 'Evento Ativo' : 'Encerrado / Inativo'}
-                  </span>
+              {/* Banner Image Header */}
+              <div className="relative h-48 w-full bg-slate-950 overflow-hidden">
+                <img
+                  src={ev.imagem_url || PRESET_BANNERS[0].url}
+                  alt={ev.titulo}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent p-5 flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`inline-block text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-md backdrop-blur-md ${
+                      ev.ativo
+                        ? 'bg-blue-600/90 text-white'
+                        : 'bg-slate-800/90 text-slate-300'
+                    }`}>
+                      {ev.ativo ? 'Evento Ativo' : 'Encerrado / Inativo'}
+                    </span>
 
-                  {isAdmin && (
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => handleOpenCreateModal(ev)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        title="Editar Evento"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEvento(ev.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        title="Excluir Evento"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
+                    {isAdmin && (
+                      <div className="flex items-center space-x-1 bg-slate-950/60 backdrop-blur-md p-1 rounded-xl border border-white/10">
+                        <button
+                          onClick={() => handleOpenCreateModal(ev)}
+                          className="p-1.5 rounded-lg text-slate-300 hover:text-amber-400 hover:bg-white/10 transition-colors"
+                          title="Editar Evento"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvento(ev.id)}
+                          className="p-1.5 rounded-lg text-slate-300 hover:text-rose-400 hover:bg-white/10 transition-colors"
+                          title="Excluir Evento"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-extrabold text-white drop-shadow-md leading-tight">
+                      {ev.titulo}
+                    </h3>
+                  </div>
                 </div>
+              </div>
 
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                  {ev.titulo}
-                </h3>
-
+              {/* Card Body */}
+              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                 {ev.descricao && (
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                     {ev.descricao}
                   </p>
                 )}
 
-                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-700 dark:text-slate-300">
+                <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>Data: <strong>{formatDateBR(ev.data_evento)}</strong></span>
@@ -294,33 +349,33 @@ export const Eventos: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                {ev.requer_inscricao && ev.ativo ? (
-                  <button
-                    onClick={() => handleOpenInscricaoModal(ev)}
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md transition-all flex items-center justify-center space-x-1.5"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    <span>Preencher Ficha de Inscrição</span>
-                  </button>
-                ) : (
-                  <span className="text-xs text-slate-400 italic">Entrada Livre (Sem necessidade de inscrição)</span>
-                )}
+                {/* Action Buttons */}
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                  {ev.requer_inscricao && ev.ativo ? (
+                    <button
+                      onClick={() => handleOpenInscricaoModal(ev)}
+                      className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center space-x-1.5"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>Preencher Ficha de Inscrição</span>
+                    </button>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">Entrada Livre (Sem necessidade de inscrição)</span>
+                  )}
 
-                {isAdmin && ev.requer_inscricao && (
-                  <button
-                    onClick={() => handleDownloadRelatorioPdf(ev.id)}
-                    disabled={downloadingPdf}
-                    className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all flex items-center space-x-1"
-                    title="Relatório de Participantes (PDF)"
-                  >
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <span>PDF ({ev.total_inscritos || 0})</span>
-                  </button>
-                )}
+                  {isAdmin && ev.requer_inscricao && (
+                    <button
+                      onClick={() => handleDownloadRelatorioPdf(ev.id)}
+                      disabled={downloadingPdf}
+                      className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs transition-all flex items-center space-x-1"
+                      title="Relatório de Participantes (PDF)"
+                    >
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      <span>PDF</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -329,8 +384,8 @@ export const Eventos: React.FC = () => {
 
       {/* MODAL CRIAR / EDITAR EVENTO (ADMIN) */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-xl shadow-2xl space-y-5 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {editingEvento ? 'Editar Evento' : 'Cadastrar Novo Evento'}
@@ -349,6 +404,50 @@ export const Eventos: React.FC = () => {
                   value={eventFormData.titulo}
                   onChange={(e) => setEventFormData({ ...eventFormData, titulo: e.target.value })}
                   placeholder="Ex: Congresso de Jovens 2026"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-slate-900 dark:text-slate-100"
+                />
+              </div>
+
+              {/* BANNER SELECTION GALLERY */}
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Selecione um Banner / Imagem Pré-existente *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-48 overflow-y-auto p-1.5 border border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-950/50">
+                  {PRESET_BANNERS.map((preset) => {
+                    const isSelected = eventFormData.imagem_url === preset.url;
+                    return (
+                      <div
+                        key={preset.id}
+                        onClick={() => setEventFormData({ ...eventFormData, imagem_url: preset.url })}
+                        className={`group relative h-20 rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-blue-600 ring-2 ring-blue-500/30 scale-[1.02]'
+                            : 'border-transparent opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={preset.url} alt={preset.nome} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-slate-950/50 p-1.5 flex flex-col justify-between">
+                          <span className="text-[9px] font-extrabold text-white bg-blue-600/90 px-1.5 py-0.5 rounded self-start">
+                            {preset.tag}
+                          </span>
+                          <span className="text-[10px] font-bold text-white truncate drop-shadow">
+                            {preset.nome}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Ou Cole a URL da Imagem do Banner</label>
+                <input
+                  type="text"
+                  value={eventFormData.imagem_url}
+                  onChange={(e) => setEventFormData({ ...eventFormData, imagem_url: e.target.value })}
+                  placeholder="https://..."
                   className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-slate-900 dark:text-slate-100"
                 />
               </div>

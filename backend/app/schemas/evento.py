@@ -8,6 +8,7 @@ class EventoBase(BaseModel):
     data_evento: date
     hora_evento: Optional[str] = None
     local: Optional[str] = "Sede Principal"
+    imagem_url: Optional[str] = None
     requer_inscricao: bool = True
     ativo: bool = True
 
@@ -20,6 +21,7 @@ class EventoUpdate(BaseModel):
     data_evento: Optional[date] = None
     hora_evento: Optional[str] = None
     local: Optional[str] = None
+    imagem_url: Optional[str] = None
     requer_inscricao: Optional[bool] = None
     ativo: Optional[bool] = None
 

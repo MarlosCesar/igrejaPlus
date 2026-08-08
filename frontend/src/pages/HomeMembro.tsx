@@ -63,7 +63,7 @@ export const HomeMembro: React.FC = () => {
       </div>
 
       {/* Quick Action Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Card 1: Membros (Ficha) */}
         <div
           onClick={() => navigate('/membros')}
@@ -75,10 +75,10 @@ export const HomeMembro: React.FC = () => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                Minha Ficha de Membro
+                Minha Ficha
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Mantenha seus dados pessoais, endereço residencial e contato atualizados.
+                Mantenha seus dados pessoais e contato atualizados.
               </p>
             </div>
           </div>
@@ -103,7 +103,7 @@ export const HomeMembro: React.FC = () => {
                 Minha Carteirinha
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Visualizar modelo oficial com foto, enquadramento e QR Code de validação.
+                Visualizar documento digital oficial com QR Code.
               </p>
             </div>
           </div>
@@ -114,7 +114,32 @@ export const HomeMembro: React.FC = () => {
           </div>
         </div>
 
-        {/* Card 3: Eventos */}
+        {/* Card 3: Escalas dos Ministérios */}
+        <div
+          onClick={() => navigate('/escalas')}
+          className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group space-y-4 flex flex-col justify-between"
+        >
+          <div className="space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                Minhas Escalas
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Consulte as escalas do seu setor e histórico de meses anteriores.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center text-xs font-bold text-amber-600 dark:text-amber-400 pt-2">
+            <span>Ver Escalas</span>
+            <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* Card 4: Eventos */}
         <div
           onClick={() => navigate('/eventos')}
           className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer group space-y-4 flex flex-col justify-between"
@@ -128,7 +153,7 @@ export const HomeMembro: React.FC = () => {
                 Eventos da Igreja
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Confira a programação e inscreva-se com sua ficha pré-preenchida.
+                Programação com banners e inscrições pré-preenchidas.
               </p>
             </div>
           </div>

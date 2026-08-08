@@ -12,6 +12,7 @@ class Evento(Base):
     data_evento = Column(Date, nullable=False)
     hora_evento = Column(String(20), nullable=True)
     local = Column(String(150), nullable=True, default="Sede Principal")
+    imagem_url = Column(String(500), nullable=True)
     requer_inscricao = Column(Boolean, default=True)
     ativo = Column(Boolean, default=True)
     data_criacao = Column(DateTime, default=datetime.utcnow)

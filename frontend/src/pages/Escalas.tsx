@@ -72,7 +72,30 @@ export const Escalas: React.FC = () => {
   const [matrizEBI, setMatrizEBI] = useState<{ [key: string]: string }>({});
 
   const { user } = useAuth();
-  const canEdit = ['Administrador', 'Secretário', 'Pastor', 'Líder'].includes(user?.user_nivel || '');
+  const canEdit = ['Administrador', 'Secretário', 'Pastor', 'Líder', 'Líder de Setor'].includes(user?.user_nivel || '');
+
+  // Filter States
+  const [selectedMesFiltro, setSelectedMesFiltro] = useState<string>('TODOS');
+  const [selectedTipoFiltro, setSelectedTipoFiltro] = useState<string>('TODOS');
+
+  // Extract unique months from saved escalas
+  const disponiveisMeses = Array.from(
+    new Set(
+      escalas
+        .map((e) => e.mes_ano)
+        .filter((m): m is string => Boolean(m && m.trim().length > 0))
+    )
+  );
+
+  const filteredEscalas = escalas.filter((escala) => {
+    if (selectedMesFiltro !== 'TODOS' && escala.mes_ano !== selectedMesFiltro) {
+      return false;
+    }
+    if (selectedTipoFiltro !== 'TODOS' && escala.tipo_escala !== selectedTipoFiltro) {
+      return false;
+    }
+    return true;
+  });
 
   useEffect(() => {
     fetchEscalas();
@@ -300,18 +323,66 @@ export const Escalas: React.FC = () => {
         )}
       </div>
 
+      {/* FILTER BAR FOR MONTHS & TYPES */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Filtrar por Mês:</span>
+          </div>
+          <select
+            value={selectedMesFiltro}
+            onChange={(e) => setSelectedMesFiltro(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+          >
+            <option value="TODOS">📅 Todos os Meses (Escalas Atuais e Antigas)</option>
+            {disponiveisMeses.map((m) => (
+              <option key={m} value={m}>
+                🗓️ {m}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex items-center space-x-2 sm:ml-4">
+            <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Tipo:</span>
+          </div>
+          <select
+            value={selectedTipoFiltro}
+            onChange={(e) => setSelectedTipoFiltro(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 font-semibold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+          >
+            <option value="TODOS">Todas as Categorias</option>
+            <option value="GERAL">Geral de Cultos</option>
+            <option value="EBI">Infantil (EBI)</option>
+          </select>
+        </div>
+
+        <div className="text-[11px] text-slate-500 font-medium self-end sm:self-center">
+          Exibindo <strong>{filteredEscalas.length}</strong> de <strong>{escalas.length}</strong> escalas
+        </div>
+      </div>
+
+      {/* Member Notice */}
+      {user?.user_nivel === 'Membro' && (
+        <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs flex items-center space-x-2">
+          <Sparkles className="w-4 h-4 shrink-0" />
+          <span>Você está visualizando as escalas dos ministérios. Utilize o filtro de meses acima para consultar escalas anteriores.</span>
+        </div>
+      )}
+
       {/* Escalas Cards / History List */}
       {loading ? (
         <div className="p-12 flex justify-center">
           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
         </div>
-      ) : escalas.length === 0 ? (
+      ) : filteredEscalas.length === 0 ? (
         <div className="p-12 text-center text-slate-400 text-xs bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          Nenhuma escala salva no histórico. Clique em "Criar Nova Escala" para gerar uma nova escala.
+          Nenhuma escala encontrada para o filtro selecionado.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {escalas.map((escala) => {
+          {filteredEscalas.map((escala) => {
             let parsedData: any = null;
             if (escala.dados_matriz) {
               try {

@@ -28,7 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     { label: 'Membros', path: '/membros', icon: Users, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
     { label: 'Carteirinha', path: '/carteirinhas', icon: CreditCard, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
     { label: 'Setores / Ministérios', path: '/setores', icon: ShieldCheck, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor'] },
-    { label: 'Escalas de Culto', path: '/escalas', icon: CalendarCheck2, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor'] },
+    { label: 'Escalas de Culto', path: '/escalas', icon: CalendarCheck2, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
     { label: 'Relatórios', path: '/relatorios', icon: FileSpreadsheet, roles: ['Administrador', 'Pastor', 'Secretário'] },
     { label: 'Auditoria & Logs', path: '/auditoria', icon: History, roles: ['Administrador', 'Pastor'] },
     { label: 'Usuários', path: '/usuarios', icon: UserCog, roles: ['Administrador', 'Pastor'] },
