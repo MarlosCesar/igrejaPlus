@@ -18,8 +18,9 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "igrejaplus_db"
     DATABASE_URL: Union[str, None] = None
 
-    # Storage
-    UPLOAD_DIR: str = "uploads"
+    # Storage & Persistence
+    DATA_DIR: str = os.getenv("DATA_DIR", "/var/data" if os.path.exists("/var/data") or os.getenv("RENDER") else os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data"))
+    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", os.path.join(DATA_DIR, "uploads"))
 
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]

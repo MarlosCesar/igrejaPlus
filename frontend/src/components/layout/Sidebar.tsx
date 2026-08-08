@@ -22,9 +22,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const { user } = useAuth();
 
   const navItems = [
+    { label: 'Home', path: '/home', icon: LayoutDashboard, roles: ['Membro'] },
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor'] },
-    { label: 'Preencher Ficha de Membro', path: '/membros', icon: Users, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
-    { label: 'Solicitar Carteirinha', path: '/carteirinhas', icon: CreditCard, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
+    { label: 'Eventos', path: '/eventos', icon: CalendarCheck2, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro', 'Visitante'] },
+    { label: 'Membros', path: '/membros', icon: Users, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
+    { label: 'Carteirinha', path: '/carteirinhas', icon: CreditCard, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor', 'Membro'] },
     { label: 'Setores / Ministérios', path: '/setores', icon: ShieldCheck, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor'] },
     { label: 'Escalas de Culto', path: '/escalas', icon: CalendarCheck2, roles: ['Administrador', 'Pastor', 'Secretário', 'Líder de Setor'] },
     { label: 'Relatórios', path: '/relatorios', icon: FileSpreadsheet, roles: ['Administrador', 'Pastor', 'Secretário'] },

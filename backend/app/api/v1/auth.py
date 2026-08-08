@@ -82,11 +82,14 @@ def register_self(data: RegisterRequest, db: Session = Depends(get_db)):
 
     log_action(db, new_user.id, new_user.nome, "REGISTER", "usuarios", new_user.id, "Cadastro de novo usuário com nível Membro")
 
-    access_token = create_access_token(subject=new_user.id)
+@router.post("/visitante", response_model=Token)
+def login_visitante(db: Session = Depends(get_db)):
+    # Create guest token
+    access_token = create_access_token(subject=0)
     return Token(
         access_token=access_token,
         token_type="bearer",
-        user_id=new_user.id,
-        user_nome=new_user.nome,
-        user_nivel=new_user.nivel
+        user_id=0,
+        user_nome="Visitante",
+        user_nivel="Visitante"
     )

@@ -51,6 +51,24 @@ export const Login: React.FC = () => {
     }
   };
 
+  const handleVisitorLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/visitante');
+      login(res.data.access_token, {
+        user_id: res.data.user_id,
+        user_nome: res.data.user_nome,
+        user_nivel: res.data.user_nivel,
+      });
+      navigate('/eventos');
+    } catch (err: any) {
+      setError('Erro ao entrar como visitante.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -296,6 +314,19 @@ export const Login: React.FC = () => {
             </button>
           </form>
         )}
+
+        {/* Visitor Access Action */}
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-800/80 text-center">
+          <button
+            type="button"
+            onClick={handleVisitorLogin}
+            disabled={loading}
+            className="w-full py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition-all flex items-center justify-center space-x-2"
+          >
+            <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span>Entrar como Visitante (Ver Eventos)</span>
+          </button>
+        </div>
       </div>
     </div>
   );

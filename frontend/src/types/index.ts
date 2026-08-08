@@ -2,7 +2,7 @@ export interface Usuario {
   id: number;
   nome: string;
   login: string;
-  nivel: 'Administrador' | 'Secretário' | 'Pastor' | 'Líder' | 'Consulta';
+  nivel: 'Administrador' | 'Secretário' | 'Pastor' | 'Líder' | 'Líder de Setor' | 'Consulta' | 'Membro' | 'Visitante';
   ativo: boolean;
   created_at: string;
 }
@@ -88,6 +88,35 @@ export interface Carteirinha {
   membro_nome?: string;
   membro_foto?: string;
   congregacao?: string;
+}
+
+export interface InscricaoEvento {
+  id: number;
+  evento_id: number;
+  membro_id?: number;
+  usuario_id?: number;
+  nome: string;
+  cpf?: string;
+  telefone?: string;
+  email?: string;
+  endereco?: string;
+  congregacao?: string;
+  presenca_confirmada: boolean;
+  data_inscricao: string;
+}
+
+export interface Evento {
+  id: number;
+  titulo: string;
+  descricao?: string;
+  data_evento: string;
+  hora_evento?: string;
+  local?: string;
+  requer_inscricao: boolean;
+  ativo: boolean;
+  data_criacao: string;
+  total_inscritos?: number;
+  inscricoes?: InscricaoEvento[];
 }
 
 export interface AuditLog {

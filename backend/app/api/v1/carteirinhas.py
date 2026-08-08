@@ -29,7 +29,10 @@ def list_carteirinhas(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    carteirinhas = db.query(Carteirinha).order_by(Carteirinha.id.desc()).all()
+    query = db.query(Carteirinha)
+    if current_user.nivel == "Membro":
+        query = query.join(Membro).filter(Membro.nome.ilike(f"%{current_user.nome}%"))
+    carteirinhas = query.order_by(Carteirinha.id.desc()).all()
     return [_format_carteirinha_response(c) for c in carteirinhas]
 
 @router.get("/pendentes")
@@ -41,7 +44,11 @@ def list_membros_pendentes(
     Returns list of members who do NOT have an issued carteirinha yet.
     """
     issued_membro_ids = [c.membro_id for c in db.query(Carteirinha.membro_id).all()]
-    pendentes = db.query(Membro).filter(~Membro.id.in_(issued_membro_ids)).all()
+    query = db.query(Membro).filter(~Membro.id.in_(issued_membro_ids))
+    if current_user.nivel == "Membro":
+        query = query.filter(Membro.nome.ilike(f"%{current_user.nome}%"))
+
+    pendentes = query.all()
     return [
         {
             "id": m.id,

@@ -30,8 +30,13 @@ def get_working_engine():
         except Exception:
             pass
 
-    # Instant fallback to SQLite if Postgres port is closed
-    fallback_url = "sqlite:///./igrejaplus.db"
+    # Ensure persistent data directory exists
+    os.makedirs(settings.DATA_DIR, exist_ok=True)
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
+    # Instant fallback to SQLite in persistent DATA_DIR if Postgres is unavailable
+    sqlite_path = os.path.join(settings.DATA_DIR, "igrejaplus.db")
+    fallback_url = f"sqlite:///{sqlite_path}"
     return create_engine(fallback_url, connect_args={"check_same_thread": False}, pool_pre_ping=True)
 
 engine = get_working_engine()

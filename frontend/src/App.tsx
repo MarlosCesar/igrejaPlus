@@ -15,6 +15,9 @@ import { Auditoria } from './pages/Auditoria';
 import { Configuracoes } from './pages/Configuracoes';
 import { Usuarios } from './pages/Usuarios';
 
+import { HomeMembro } from './pages/HomeMembro';
+import { Eventos } from './pages/Eventos';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -30,6 +33,17 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
+};
+
+const DefaultRedirect: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.user_nivel === 'Membro') {
+    return <Navigate to="/home" replace />;
+  }
+  if (user?.user_nivel === 'Visitante') {
+    return <Navigate to="/eventos" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
 };
 
 export const App: React.FC = () => {
@@ -49,8 +63,10 @@ export const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route index element={<DefaultRedirect />} />
+                <Route path="home" element={<HomeMembro />} />
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="eventos" element={<Eventos />} />
                 <Route path="membros" element={<Membros />} />
                 <Route path="setores" element={<Setores />} />
                 <Route path="escalas" element={<Escalas />} />
@@ -61,7 +77,7 @@ export const App: React.FC = () => {
                 <Route path="usuarios" element={<Usuarios />} />
               </Route>
 
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>

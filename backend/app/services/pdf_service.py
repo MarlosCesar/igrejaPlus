@@ -299,5 +299,87 @@ def generate_report_pdf(title: str, headers: list, data: list, filename: str) ->
 
     story.append(table)
     doc.build(story)
+    return f"/uploads/exportacoes/{filename}"
+
+
+def generate_relatorio_evento_pdf(titulo_evento: str, data_evento: str, local: str, inscritos: list) -> str:
+    """
+    Generates a printable PDF report for event participants.
+    """
+    output_dir = os.path.join(settings.UPLOAD_DIR, "exportacoes")
+    os.makedirs(output_dir, exist_ok=True)
+    clean_title = titulo_evento.replace(" ", "_").lower()
+    filename = f"relatorio_evento_{clean_title}.pdf"
+    pdf_path = os.path.join(output_dir, filename)
+
+    doc = SimpleDocTemplate(
+        pdf_path,
+        pagesize=A4,
+        rightMargin=1*cm,
+        leftMargin=1*cm,
+        topMargin=1*cm,
+        bottomMargin=1*cm
+    )
+    story = []
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'EvTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=14,
+        textColor=colors.HexColor('#1E3A8A'),
+        alignment=1,
+        spaceAfter=4
+    )
+    sub_style = ParagraphStyle(
+        'EvSub',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9,
+        textColor=colors.HexColor('#475569'),
+        alignment=1,
+        spaceAfter=12
+    )
+    cell_style = ParagraphStyle(
+        'Cell',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=8,
+        textColor=colors.HexColor('#1E293B')
+    )
+
+    story.append(Paragraph(f"RELATÓRIO DE PARTICIPANTES - {titulo_evento.upper()}", title_style))
+    story.append(Paragraph(f"Data do Evento: {data_evento} | Local: {local} | Total de Inscritos: {len(inscritos)}", sub_style))
+
+    table_data = [
+        ["Nº", "NOME COMPLETO", "TELEFONE", "CONGREGAÇÃO", "DATA INSCRIÇÃO"]
+    ]
+
+    for idx, ins in enumerate(inscritos, 1):
+        dt_str = ins.data_inscricao.strftime("%d/%m/%Y %H:%M") if hasattr(ins.data_inscricao, "strftime") else str(ins.data_inscricao)
+        table_data.append([
+            str(idx),
+            Paragraph(ins.nome or "-", cell_style),
+            ins.telefone or "-",
+            ins.congregacao or "Jardim Primavera",
+            dt_str
+        ])
+
+    table = Table(table_data, colWidths=[1*cm, 7.5*cm, 3.5*cm, 4*cm, 3*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1E3A8A')),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,0), 9),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E1')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F8FAFC')]),
+        ('PADDING', (0,0), (-1,-1), 5),
+    ]))
+
+    story.append(table)
+    doc.build(story)
 
     return f"/uploads/exportacoes/{filename}"

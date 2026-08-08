@@ -19,6 +19,7 @@ from app.api.v1.auditoria import router as auditoria_router
 from app.api.v1.configuracoes import router as configuracoes_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.busca import router as busca_router
+from app.api.v1.eventos import router as eventos_router
 
 from sqlalchemy import text
 
@@ -139,6 +140,7 @@ app.include_router(auditoria_router, prefix=f"{settings.API_V1_STR}/auditoria", 
 app.include_router(configuracoes_router, prefix=f"{settings.API_V1_STR}/configuracoes", tags=["Configurações"])
 app.include_router(dashboard_router, prefix=f"{settings.API_V1_STR}/dashboard", tags=["Dashboard"])
 app.include_router(busca_router, prefix=f"{settings.API_V1_STR}/busca", tags=["Busca Global"])
+app.include_router(eventos_router, prefix=f"{settings.API_V1_STR}/eventos", tags=["Eventos"])
 
 @app.get("/api/v1/health")
 def health_check():

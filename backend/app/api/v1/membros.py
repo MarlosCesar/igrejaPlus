@@ -30,6 +30,10 @@ def list_membros(
 ):
     query = db.query(Membro)
 
+    # Privacy isolation for Membro role - only see own data
+    if current_user.nivel == "Membro":
+        query = query.filter(or_(Membro.nome.ilike(f"%{current_user.nome}%"), Membro.email == current_user.login))
+
     if nome:
         query = query.filter(Membro.nome.ilike(f"%{nome}%"))
     if cpf:
