@@ -140,6 +140,25 @@ app.include_router(configuracoes_router, prefix=f"{settings.API_V1_STR}/configur
 app.include_router(dashboard_router, prefix=f"{settings.API_V1_STR}/dashboard", tags=["Dashboard"])
 app.include_router(busca_router, prefix=f"{settings.API_V1_STR}/busca", tags=["Busca Global"])
 
-@app.get("/")
-def root():
+@app.get("/api/v1/health")
+def health_check():
     return {"project": settings.PROJECT_NAME, "status": "online", "docs": "/docs"}
+
+# Mount frontend SPA if dist exists (Render / Production deployment)
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    from fastapi.responses import FileResponse
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api") or full_path.startswith("uploads") or full_path.startswith("docs") or full_path.startswith("redoc"):
+            return {"error": "Not Found"}
+        file_path = os.path.join(frontend_dist, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
+else:
+    @app.get("/")
+    def root():
+        return {"project": settings.PROJECT_NAME, "status": "online", "docs": "/docs"}
