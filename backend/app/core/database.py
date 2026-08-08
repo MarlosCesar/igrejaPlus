@@ -18,24 +18,17 @@ def is_postgres_port_open(host: str = "127.0.0.1", port: int = 5432) -> bool:
 
 def get_working_engine():
     if settings.DATABASE_URL:
-        # If user configured a cloud database (Postgres/Supabase/Render Postgres), use it directly
         url = settings.get_database_url()
         if url.startswith("sqlite"):
             return create_engine(url, connect_args={"check_same_thread": False}, pool_pre_ping=True)
-        return create_engine(url, pool_pre_ping=True)
-
-    if db_url.startswith("sqlite"):
-        return create_engine(db_url, connect_args={"check_same_thread": False}, pool_pre_ping=True)
-
-    # Check if Postgres host/port is responsive
-    pg_host = settings.POSTGRES_SERVER
-    pg_port = int(settings.POSTGRES_PORT)
-
-    if is_postgres_port_open(pg_host, pg_port):
         try:
-            return create_engine(db_url, pool_pre_ping=True)
-        except Exception:
-            pass
+            test_engine = create_engine(url, pool_pre_ping=True)
+            with test_engine.connect() as conn:
+                pass
+            print("[DATABASE] Successfully connected to cloud PostgreSQL database!")
+            return test_engine
+        except Exception as e:
+            print(f"[DATABASE WARNING] Failed to connect to DATABASE_URL: {e}. Falling back to persistent SQLite.")
 
     # Ensure persistent data directory exists
     os.makedirs(settings.DATA_DIR, exist_ok=True)
