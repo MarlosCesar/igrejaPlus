@@ -69,7 +69,7 @@ export const Membros: React.FC = () => {
   const [loadingCep, setLoadingCep] = useState(false);
 
   const { user } = useAuth();
-  const canEdit = ['Administrador', 'Secretário', 'Pastor'].includes(user?.user_nivel || '');
+  const canEdit = ['Administrador', 'Secretário', 'Pastor', 'Líder', 'Líder de Setor', 'Membro'].includes(user?.user_nivel || '');
 
   const instrumentosOpcoes = [
     'Teclado',
@@ -598,23 +598,21 @@ export const Membros: React.FC = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        {canEdit && (
-                          <>
-                            <button
-                              onClick={() => handleOpenEditModal(membro)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                              title="Editar"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(membro.id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                              title="Inativar"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </>
+                        <button
+                          onClick={() => handleOpenEditModal(membro)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          title={isMembroRole ? "Editar Meus Dados" : "Editar"}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        {!isMembroRole && (
+                          <button
+                            onClick={() => handleDelete(membro.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title="Inativar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         )}
                       </div>
                     </td>
