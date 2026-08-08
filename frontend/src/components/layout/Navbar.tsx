@@ -53,10 +53,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
             {user?.user_nome?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="hidden md:block text-left">
-            <p className="text-xs font-medium text-slate-200 dark:text-slate-200 light:text-slate-900 leading-none">
+            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-none">
               {user?.user_nome || 'Usuário'}
             </p>
-            <p className="text-[10px] text-blue-400 font-medium leading-none mt-1">
+            <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold leading-none mt-1">
               {user?.user_nivel || 'Membro'}
             </p>
           </div>

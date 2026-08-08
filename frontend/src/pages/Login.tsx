@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Church, Lock, User, ArrowRight, AlertCircle, Loader2, Mail, Phone, UserPlus, LogIn } from 'lucide-react';
+import { Church, Lock, User, ArrowRight, AlertCircle, Loader2, Mail, Phone, UserPlus, LogIn, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 
 export const Login: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   // Form fields
@@ -78,32 +80,51 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 dark:bg-slate-950 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4 relative overflow-hidden transition-colors duration-300">
       {/* Background Glows */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/15 dark:bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600/15 dark:bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl z-10 space-y-6">
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-5 right-5 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 shadow-md backdrop-blur-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-all z-50 flex items-center space-x-2 text-xs font-semibold"
+        title={`Alternar para modo ${theme === 'dark' ? 'claro' : 'escuro'}`}
+      >
+        {theme === 'dark' ? (
+          <>
+            <Sun className="w-4 h-4 text-amber-400" />
+            <span>Modo Claro</span>
+          </>
+        ) : (
+          <>
+            <Moon className="w-4 h-4 text-indigo-600" />
+            <span>Modo Escuro</span>
+          </>
+        )}
+      </button>
+
+      <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl z-10 space-y-6 transition-colors duration-300">
         {/* Logo Header */}
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-xl shadow-blue-600/30 mb-3">
             <Church className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
-            Igreja<span className="text-blue-500">+</span>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Igreja<span className="text-blue-600 dark:text-blue-500">+</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Sistema Profissional de Gestão de Igreja</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Sistema Profissional de Gestão de Igreja</p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-2 p-1 bg-slate-950/80 border border-slate-800 rounded-2xl">
+        <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-2xl">
           <button
             type="button"
             onClick={() => { setIsRegisterMode(false); setError(''); }}
             className={`py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5 ${
               !isRegisterMode
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <LogIn className="w-3.5 h-3.5" />
@@ -115,7 +136,7 @@ export const Login: React.FC = () => {
             className={`py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5 ${
               isRegisterMode
                 ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -124,7 +145,7 @@ export const Login: React.FC = () => {
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start space-x-3 text-red-400 text-xs">
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start space-x-3 text-red-600 dark:text-red-400 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
@@ -134,7 +155,7 @@ export const Login: React.FC = () => {
         {!isRegisterMode ? (
           <form onSubmit={handleSubmitLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Login / Usuário</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Login / Usuário</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
                 <input
@@ -143,13 +164,13 @@ export const Login: React.FC = () => {
                   value={loginInput}
                   onChange={(e) => setLoginInput(e.target.value)}
                   placeholder="Seu usuário..."
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Senha</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Senha</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
                 <input
@@ -158,7 +179,7 @@ export const Login: React.FC = () => {
                   value={senhaInput}
                   onChange={(e) => setSenhaInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                 />
               </div>
             </div>
@@ -182,7 +203,7 @@ export const Login: React.FC = () => {
           /* REGISTER FORM */
           <form onSubmit={handleSubmitRegister} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Nome Completo *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nome Completo *</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
                 <input
@@ -191,13 +212,13 @@ export const Login: React.FC = () => {
                   value={nomeInput}
                   onChange={(e) => setNomeInput(e.target.value)}
                   placeholder="Seu nome..."
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Login de Acesso *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Login de Acesso *</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
                 <input
@@ -206,14 +227,14 @@ export const Login: React.FC = () => {
                   value={loginInput}
                   onChange={(e) => setLoginInput(e.target.value)}
                   placeholder="Crie seu usuário..."
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">E-mail</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">E-mail</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" />
                   <input
@@ -221,13 +242,13 @@ export const Login: React.FC = () => {
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     placeholder="email@..."
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-8 pr-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                    className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-8 pr-2.5 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Telefone</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Telefone</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" />
                   <input
@@ -235,14 +256,14 @@ export const Login: React.FC = () => {
                     value={telefoneInput}
                     onChange={(e) => setTelefoneInput(e.target.value)}
                     placeholder="(21)..."
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-8 pr-2.5 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                    className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-8 pr-2.5 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Senha *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Senha *</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
                 <input
@@ -251,12 +272,12 @@ export const Login: React.FC = () => {
                   value={senhaInput}
                   onChange={(e) => setSenhaInput(e.target.value)}
                   placeholder="Crie uma senha..."
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                 />
               </div>
             </div>
 
-            <p className="text-[10px] text-slate-400 leading-tight">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
               * Este cadastro permite preencher sua ficha de membro e solicitar sua carteirinha oficial.
             </p>
 
