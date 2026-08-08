@@ -34,7 +34,8 @@ def check_and_migrate_db():
         "ALTER TABLE escalas ADD COLUMN mes_ano VARCHAR(50)",
         "ALTER TABLE escalas ADD COLUMN dados_matriz TEXT",
         "ALTER TABLE usuarios ADD COLUMN exige_nova_senha BOOLEAN DEFAULT FALSE",
-        "ALTER TABLE eventos ADD COLUMN imagem_url VARCHAR(500)"
+        "ALTER TABLE eventos ADD COLUMN imagem_url VARCHAR(500)",
+        "ALTER TABLE membros ALTER COLUMN foto TYPE TEXT"
     ]
     for stmt in statements:
         try:

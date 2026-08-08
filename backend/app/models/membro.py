@@ -35,7 +35,7 @@ class Membro(Base):
     cargo: Mapped[Optional[str]] = mapped_column(String(50), default="Membro", index=True) # Membro, Diácono, Missionário, Pastor, Obreiro, Bispo
     situacao: Mapped[str] = mapped_column(String(50), default="Ativo", index=True) # Ativo, Inativo, Afastado, Visitante
     observacoes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    foto: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    foto: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

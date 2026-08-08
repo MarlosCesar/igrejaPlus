@@ -208,10 +208,16 @@ def upload_foto(
     filename = f"foto_membro_{membro_id}_{uuid.uuid4().hex[:8]}{ext}"
     filepath = os.path.join(output_dir, filename)
 
+    contents = upload_file.file.read()
     with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(upload_file.file, buffer)
+        buffer.write(contents)
 
-    foto_url = f"/uploads/fotos/{filename}"
+    # Encode to Base64 Data URL for persistent cloud storage in PostgreSQL
+    import base64
+    mime = "image/png" if ext.lower() == ".png" else "image/jpeg"
+    b64_str = base64.b64encode(contents).decode('utf-8')
+    foto_url = f"data:{mime};base64,{b64_str}"
+
     membro.foto = foto_url
     db.commit()
 
