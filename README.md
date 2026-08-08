@@ -28,31 +28,7 @@
 - **Docker & Docker Compose**
 
 ---
-
-## 🚀 Como Executar
-
-### 1. Executando com Docker Compose (Recomendado)
-
-Rode apenas um comando na raiz do projeto:
-
-```bash
-docker-compose up -d --build
-```
-
-O sistema estará disponível em:
-- **Frontend App**: `http://localhost`
-- **Backend API**: `http://localhost:8000`
-- **Documentação Swagger**: `http://localhost:8000/docs`
-
-### 2. Executando Localmente no Windows / Desenvolvimento
-
-#### Backend (FastAPI):
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-python -m uvicorn main:app --reload --port 8000
+ --port 8000
 ```
 
 #### Frontend (React + Vite):
